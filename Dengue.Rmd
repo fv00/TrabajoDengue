@@ -7,6 +7,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#Cargamos los paquetes necesarios
+
+```{r}
+library(tidyverse)
+library(caret)
+library(doParallel)
+```
+
+
 
 ```{r}
 train = read.csv('dengue_features_train.csv')
