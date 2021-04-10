@@ -1,0 +1,18 @@
+---
+title: "Dengue"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+train = read.csv('dengue_features_train.csv')
+
+labels = read.csv('dengue_labels_train.csv')
+
+train$n_cases = labels[,4]
+```
+
