@@ -13,8 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
 library(doParallel)
+library(egg)
 ```
-
 
 
 ```{r}
@@ -25,4 +25,48 @@ labels = read.csv('dengue_labels_train.csv')
 train$n_cases = labels[,4]
 ```
 
-## Gráficos descriptivos
+```{r}
+summary(train)
+```
+
+# Gráficos descriptivos
+
+```{r}
+#Distribucion del numero de casos
+
+ggplot(train,aes(n_cases))+
+  geom_histogram(fill='blue',col='black')+
+  theme_bw()
+
+
+```
+
+## Estudio de outliers 
+
+```{r}
+ggplot(train,aes(y=n_cases))+
+  geom_boxplot()+
+  theme_bw()
+```
+
+De momento nos saltaremos retirar los outliers pues pueden ser de uso a la hora de entrenar el modelo.
+
+
+```{r}
+p1 = ggplot(train,aes(station_avg_temp_c,n_cases,col=city))+
+  geom_point()+
+  theme_bw()
+
+p2 = ggplot(train,aes(city,n_cases,col=city))+
+  geom_boxplot()+
+  geom_jitter(alpha=0.5)+
+  theme_bw()
+
+
+ggarrange(p1,p2)
+
+wilcox.test(train$n_cases[which(train$city=='sj')],train$n_cases[which(train$city=='iq')],alternative = 'greater')
+```
+
+Podemos ver como hay una seria diferencia en los casos de dengue segun la ciudad que fijamos, siendo la 'sj' la que cuenta, en promedio, con mayor numero de casos, lo cual indica que esta variable será de utilidad a la hora de predecir el número de casos.
+
