@@ -68,5 +68,5 @@ ggarrange(p1,p2)
 wilcox.test(train$n_cases[which(train$city=='sj')],train$n_cases[which(train$city=='iq')],alternative = 'greater')
 ```
 
-Podemos ver como hay una seria diferencia en los casos de dengue segun la ciudad que fijamos, siendo la 'sj' la que cuenta, en promedio, con mayor numero de casos, lo cual indica que esta variable será de utilidad a la hora de predecir el número de casos.
+Podemos ver como hay una seria diferencia en los casos de dengue segun la ciudad que fijamos, siendo la 'sj' la que cuenta, en promedio, con mayor numero de casos, lo cual indica que esta variable será de utilidad a la hora de predecir el valor de la variable respuesta.
 
