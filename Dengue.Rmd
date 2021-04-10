@@ -16,3 +16,4 @@ labels = read.csv('dengue_labels_train.csv')
 train$n_cases = labels[,4]
 ```
 
+## Gráficos descriptivos
