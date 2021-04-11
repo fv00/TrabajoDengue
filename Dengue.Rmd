@@ -70,3 +70,34 @@ wilcox.test(train$n_cases[which(train$city=='sj')],train$n_cases[which(train$cit
 
 Podemos ver como hay una seria diferencia en los casos de dengue segun la ciudad que fijamos, siendo la 'sj' la que cuenta, en promedio, con mayor numero de casos, lo cual indica que esta variable será de utilidad a la hora de predecir el valor de la variable respuesta.
 
+
+De ahora en adelante utilizaremos una base en la que retiramos los valores extremos, con la intención de que no afecten la tendencia general de los datos
+```{r}
+t = train[which(train$n_cases<3*diff(quantile(train$n_cases),p=c(0.25,0.75))),]
+
+# Es el indice de vegetación influyente en la cantidad de casos de dengue.
+
+p1 = ggplot(t,aes(x = ndvi_ne,y=n_cases))+
+  geom_point(col = '#33CC99')+
+  geom_smooth(method = 'loess',se=F)+
+  theme_bw()
+
+p2 = ggplot(t,aes(x = ndvi_nw,y=n_cases))+
+  geom_point(col = '#66FFCC')+
+  geom_smooth(method = 'loess',se=F)+
+  theme_bw()
+
+p3 = ggplot(t,aes(x = ndvi_se,y=n_cases))+
+  geom_point(col = '#00FFFF')+
+  geom_smooth(method = 'loess',se=F)+
+  theme_bw()
+
+p4 = ggplot(t,aes(x = ndvi_sw,y=n_cases))+
+  geom_point(col = '#33FFCC')+
+  geom_smooth(method = 'loess',se=F)+
+  theme_bw()
+
+ggarrange(p1,p2,p3,p4)
+```
+
+A primera vista no parece que el número de casos depende de alguna forma del índice de vegetación, sin embargo esto no significa que no sean importantes para la solución del problema, pues este es el efecto individual de cada variante del indice, y puede ser que se necesite la interacción entre los cuatro para notar una relación con la cantidad de casos de dengue registrados.
