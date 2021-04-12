@@ -101,3 +101,68 @@ ggarrange(p1,p2,p3,p4)
 ```
 
 A primera vista no parece que el número de casos depende de alguna forma del índice de vegetación, sin embargo esto no significa que no sean importantes para la solución del problema, pues este es el efecto individual de cada variante del indice, y puede ser que se necesite la interacción entre los cuatro para notar una relación con la cantidad de casos de dengue registrados.
+
+
+```{r}
+# Como afecta la precipitación a la cantidad de casos?
+
+p1 = ggplot(t,aes(x=precipitation_amt_mm,y=n_cases))+
+  geom_point()+
+  geom_smooth(se = F,method = 'loess')+
+  labs(title = 'Precipitacion  vs # de casos')+
+  theme_bw()
+
+p2= ggplot(t,aes(station_precip_mm,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title='Precipitación medida por estación vs # de casos')+
+  theme_bw()
+
+p3 = ggplot(t,aes(reanalysis_precip_amt_kg_per_m2,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title='Precipitación medida por reanalysis vs # de casos')+
+  theme_bw()
+
+ggarrange(p1,p2,p3,nrow = 2,ncol=2)
+```
+
+```{r}
+#Efecto de la humedad 
+
+p1 = ggplot(t,aes(reanalysis_relative_humidity_percent,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title = 'Porcentaje de humedad relativa vs # de casos')+
+  theme_bw()
+
+p2 = ggplot(t,aes(reanalysis_specific_humidity_g_per_kg,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title = 'humedad específica por kg vs # de casos')+
+  theme_bw()
+
+ggarrange(p1,p2)
+
+```
+
+```{r}
+#Efecto de la temperatura
+
+p1 = ggplot(t,aes(reanalysis_avg_temp_k,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title = 'Temperatura promedio medida por reanalysis (K) vs casos')+
+  theme_bw()
+
+p2 = ggplot(t,aes(station_avg_temp_c,n_cases))+
+  geom_point()+
+  geom_smooth(se=F,method = 'loess')+
+  labs(title = 'Temperatura promedio medida por estación (C) vs casos')+
+  theme_bw()
+
+ggarrange(p1,p2)
+
+```
+
+En todos los gráficos anteriores podemos ver como, a pesar de que hay varias variables para temperatura, humedad, etc. Estas explican básicamente lo mismo sobre la cantidad de casos de dengue en cada momento; por lo que porbablemente sólo se utilice una de cada una de este tipo.
