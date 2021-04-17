@@ -14,6 +14,7 @@ library(tidyverse)
 library(caret)
 library(doParallel)
 library(egg)
+library(recipes)
 ```
 
 
@@ -165,4 +166,35 @@ ggarrange(p1,p2)
 
 ```
 
-En todos los gráficos anteriores podemos ver como, a pesar de que hay varias variables para temperatura, humedad, etc. Estas explican básicamente lo mismo sobre la cantidad de casos de dengue en cada momento; por lo que porbablemente sólo se utilice una de cada una de este tipo.
+En todos los gráficos anteriores podemos ver como, a pesar de que hay varias variables para temperatura, humedad, etc. Estas explican básicamente lo mismo sobre la cantidad de casos de dengue en cada momento; por lo que probablemente sólo se utilice una de cada una de este tipo.
+
+## Preprocesado de los datos
+
+```{r}
+#Dividimos la base de datos en una base de entrenamiento y una de prueba
+set.seed(4502)
+
+indexes = sample(nrow(train),round(nrow(train)*0.75))
+
+train_train = train[indexes,]
+
+test_train = train[-indexes,]
+```
+
+```{r}
+## Recetas para los datos
+
+objeto_recipe = recipe(n_cases~.,data=train_train[,-c(4)])
+
+objeto_recipe = objeto_recipe%>%
+  step_bagimpute(all_predictors())%>% #Imputar NA's
+  step_nzv(all_predictors())%>% #Remover variables con varianza cercana a cero
+  step_center(all_numeric(),-all_outcomes())%>% #Centrar variables numericas
+  step_scale(all_numeric(),-all_outcomes()) #Escalar variables numericas
+
+train_recipe = prep(objeto_recipe,training = train_train)
+
+train_train_f = bake(train_recipe,new_data = train_train)
+test_train_f = bake(train_recipe,new_data = test_train)
+```
+
