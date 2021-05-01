@@ -180,9 +180,10 @@ train_train = train[indexes,]
 
 test_train = train[-indexes,]
 ```
+## Recetas para los datos
 
 ```{r}
-## Recetas para los datos
+
 
 objeto_recipe = recipe(n_cases~.,data=train_train[,-c(4)])
 
@@ -196,5 +197,115 @@ train_recipe = prep(objeto_recipe,training = train_train)
 
 train_train_f = bake(train_recipe,new_data = train_train)
 test_train_f = bake(train_recipe,new_data = test_train)
+```
+
+## bootsrap para escoger variables
+
+```{r}
+cls = makePSOCKcluster(4)
+
+registerDoParallel(cls)
+
+subsets = 10:23
+
+repeticiones = 5
+
+set.seed(420)
+
+seeds = vector(mode = 'list',length = repeticiones + 1)
+
+for (i in 1:repeticiones){
+  
+  seeds[[i]] = sample.int(1000,length(subsets))
+  
+}
+seeds[[repeticiones + 1]] = sample.int(1000,1)
+
+control_rfe = rfeControl(functions = rfFuncs,method = 'boot', number = repeticiones,verbose = F,returnResamp = 'all',seeds = seeds,allowParallel = T)
+
+set.seed(432)
+
+rf_rfe = rfe(n_cases~.,data = train_train_f,sizes = subsets,metric = 'RMSE',rfeControl = control_rfe,ntree = 500)
+
+rf_rfe
+
+stopCluster(cls)
+```
+
+## Seleccionar sólo las variables óptimas
+
+```{r}
+train_train_f = train_train_f[,rf_rfe$optVariables]
+
+train_train_f$n_cases = train_train$n_cases
+```
+
+## Modelo Random forest
+
+```{r}
+cls = makePSOCKcluster(4)
+registerDoParallel(cls)
+
+repeticiones = 4
+partes = 3
+
+hiperparametros = expand.grid(mtry = 7:15,min.node.size = c(2,3,5,8,10,15),splitrule = 'variance')
+
+set.seed(1234)
+seeds = vector(mode = 'list',length = repeticiones*partes+1)
+
+for (i in 1:(repeticiones*partes)){
+  
+  seeds[[i]] = sample.int(1000, nrow(hiperparametros))
+  
+}
+
+seeds[[repeticiones*partes+1]] = sample.int(1000,1)
+
+rf_control = trainControl(method = 'repeatedcv',number = partes,repeats = repeticiones,verboseIter = F,allowParallel = T,returnResamp = 'final',seeds = seeds)
+
+set.seed(432)
+
+model_rf = train(n_cases~.,train_train_f,method ='ranger',metric = 'RMSE',tuneGrid = hiperparametros,num.trees = 500,trControl = rf_control)
+
+model_rf
+
+stopCluster(cls)
+```
+
+## Modelo Xgboost
+
+```{r}
+cls = makePSOCKcluster(4)
+registerDoParallel(cls)
+
+repeticiones = 4
+partes = 3
+
+hiperparametros = expand.grid(interaction.depth = c(1, 2),
+                               n.trees = c(500, 1000, 2000),
+                               shrinkage = c(0.001, 0.01, 0.1),
+                               n.minobsinnode = c(3:8))
+
+set.seed(1234)
+seeds = vector(mode = 'list',length = repeticiones*partes+1)
+
+for (i in 1:(repeticiones*partes)){
+  
+  seeds[[i]] = sample.int(1000, nrow(hiperparametros))
+  
+}
+
+seeds[[repeticiones*partes+1]] = sample.int(1000,1)
+
+xgb_control = trainControl(method = 'repeatedcv',number = partes,repeats = repeticiones,verboseIter = F,allowParallel = T,returnResamp = 'final',seeds = seeds)
+
+set.seed(432)
+
+model_xgb = train(n_cases~.,train_train_f,method ='gbm',metric = 'RMSE',tuneGrid = hiperparametros,distribution = 'poisson',verbose = F,trControl = xgb_control)
+
+model_xgb
+
+stopCluster(cls)
 ```
 
